@@ -1,0 +1,12 @@
+{
+"single": [
+    {"lower_limit": 0, "upper_limit": 40000, "tax_rate": 0},
+    {"lower_limit": 40000, "upper_limit": 441450, "tax_rate": 0.15},
+    {"lower_limit": 441450, "upper_limit": null, "tax_rate": 0.20}
+],
+"married": [
+    {"lower_limit": 0, "upper_limit": 80000, "tax_rate": 0},
+    {"lower_limit": 80000, "upper_limit": 496600, "tax_rate": 0.15},
+    {"lower_limit": 496600, "upper_limit": null, "tax_rate": 0.20}
+]
+}

@@ -1,0 +1,10 @@
+{
+"single": {
+    "base_amount": 25000,
+    "phaseout": 9000
+},
+"married": {
+    "base_amount": 32000,
+    "phaseout": 12000
+}
+}
