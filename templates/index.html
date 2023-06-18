@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Calculate Taxes</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f2f2f2;
+      }
+      h1 {
+        text-align: center;
+        color: #333;
+      }
+      form {
+        max-width: 500px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #fff;
+        border-radius: 5px;
+        box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.2);
+      }
+      label {
+        display: block;
+        margin-bottom: 10px;
+        color: #333;
+      }
+      input[type="number"],
+      select {
+        display: block;
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+        margin-bottom: 20px;
+        font-size: 16px;
+        color: #555;
+      }
+      input[type="submit"] {
+        background-color: #4CAF50;
+        color: #fff;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        font-size: 16px;
+        cursor: pointer;
+      }
+      input[type="submit"]:hover {
+        background-color: #3e8e41;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Calculate Taxes</h1>
+    <form action="/calculate_taxes" method="POST">
+      <label for="regular_income">Regular Income:</label>
+      <input type="number" name="regular_income" id="regular_income" required>
+      <label for="capital_gains">Capital Gains:</label>
+      <input type="number" name="capital_gains" id="capital_gains" required>
+      <label for="social_security_benefits">Social Security Benefits:</label>
+      <input type="number" name="social_security_benefits" id="social_security_benefits" required>
+      <label for="filing_status">Filing Status:</label>
+      <select name="filing_status" id="filing_status" required>
+        <option value="single">Single</option>
+        <option value="married">Married</option>
+      </select>
+      <input type="submit" value="Calculate Taxes">
+    </form>
+  </body>
+</html>
