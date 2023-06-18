@@ -32,33 +32,30 @@ class TestCalculateTaxableSocialSecurityBenefits(unittest.TestCase):
 
 class TestCalculateTaxLiability(unittest.TestCase):
     def setUp(self):
-        self.tax_brackets = [(0, 10000, 0.1), (10000, 20000, 0.2), (20000, float('inf'), 0.3)]
-    def test_taxable_income_below_bracket(self):
-        taxable_income = 5000
-        expected_tax_liability = 500
-        self.assertAlmostEqual(calculate_tax_liability(taxable_income, self.tax_brackets), expected_tax_liability)
-
-    def test_taxable_income_within_bracket(self):
-        taxable_income = 15000
-        expected_tax_liability = 2000
-        self.assertAlmostEqual(calculate_tax_liability(taxable_income, self.tax_brackets), expected_tax_liability)
-
-    def test_taxable_income_above_bracket(self):
-        taxable_income = 30000
-        expected_tax_liability = 6000
-        self.assertAlmostEqual(calculate_tax_liability(taxable_income, self.tax_brackets), expected_tax_liability)
-
-    def test_single_bracket(self):
-        taxable_income = 15000
-        tax_brackets = [(0, float('inf'), 0.1)]
-        expected_tax_liability = 1500
-        self.assertAlmostEqual(calculate_tax_liability(taxable_income, tax_brackets), expected_tax_liability)
-
-    def test_no_tax_brackets(self):
-        taxable_income = 50000
-        tax_brackets = []
+        self.tax_brackets = [{'lower_limit': 0, 'upper_limit': 10000, 'tax_rate': 0.1},
+                             {'lower_limit': 10000, 'upper_limit': 50000, 'tax_rate': 0.2},
+                             {'lower_limit': 50000, 'upper_limit': float('inf'), 'tax_rate': 0.3}]
+    
+    def test_tax_liability_with_no_income(self):
+        income = 0
         expected_tax_liability = 0
-        self.assertAlmostEqual(calculate_tax_liability(taxable_income, tax_brackets), expected_tax_liability)
+        self.assertEqual(calculate_tax_liability(income, self.tax_brackets), expected_tax_liability)
+
+    def test_tax_liability_with_income_in_first_tax_bracket(self):
+        income = 5000
+        expected_tax_liability = 500
+        self.assertEqual(calculate_tax_liability(income, self.tax_brackets), expected_tax_liability)
+        
+    def test_tax_liability_with_income_in_second_tax_bracket(self):
+        income = 15000
+        expected_tax_liability = 1000 + 5000 * 0.2
+        self.assertEqual(calculate_tax_liability(income, self.tax_brackets), expected_tax_liability)
+       
+        
+    def test_tax_liability_with_income_above_upper_limit(self):
+        income = 100000
+        expected_tax_liability = 10000*0.1+40000*0.2+50000*0.3
+        self.assertEqual(calculate_tax_liability(income, self.tax_brackets), expected_tax_liability)
 
 
 class TestCalculateLongTermCapitalGainsTaxLiability(unittest.TestCase):

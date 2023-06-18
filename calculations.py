@@ -1,3 +1,10 @@
+import json
+
+SOCIAL_SECURITY_THRESHOLD_FILE = 'configs/social_security_thresholds.json'
+INCOME_TAX_BRACKETS_FILE = 'configs/federal_tax_brackets.json'
+CAPITAL_GAINS_TAX_BRACKETS_FILE = 'configs/capital_gains_tax_brackets.json'
+STANDARD_DEDUCTION = 'configs/federal_standard_deduction.json'
+
 def calculate_taxable_social_security_benefits(combined_income, social_security_thresholds, social_security_benefits):
     """
     Calculates the taxable amount of Social Security benefits based on the combined income, 
@@ -20,24 +27,25 @@ def calculate_taxable_social_security_benefits(combined_income, social_security_
         taxable_amount = phaseout * 0.5 + (combined_income - base_amount - phaseout) * 0.85
     return min(0.85 * social_security_benefits, taxable_amount)
 
-def calculate_tax_liability(taxable_income, tax_brackets):
+def calculate_tax_liability(income, tax_brackets):
     """
-    Calculates the tax liability based on taxable income and tax brackets.
-    Args:
-    taxable_income (float): The taxable income.
-    tax_brackets (list): A list of tuples representing the tax brackets. Each tuple contains three values: 
-    the lower limit of the bracket, the upper limit of the bracket, and the tax rate for that bracket.
+    Calculates the tax liability based on the provided income and tax brackets.
+
+    Parameters:
+        income (float): The taxable income.
+        tax_brackets (list): A list of dictionaries containing the tax brackets.
+
     Returns:
-    float: The tax liability.
+        float: The tax liability based on the provided income and tax brackets.
     """
-    tax_liability = 0
+    tax_owed = 0
     for bracket in tax_brackets:
-        if taxable_income > bracket[0]:
-            taxable_amount = min(taxable_income, bracket[1]) - bracket[0]
-            tax_liability += taxable_amount * bracket[2]
-        else:
-            break
-    return tax_liability
+        if income > bracket['lower_limit']:
+            taxable_income = min(income, bracket['upper_limit']) - bracket['lower_limit']
+            tax_owed += taxable_income * bracket['tax_rate']
+            if income <= bracket['upper_limit']:
+                break
+    return tax_owed
 
 
 def calculate_long_term_capital_gains_tax_liability(taxable_income, capital_gains, tax_brackets):
@@ -81,50 +89,23 @@ def calculate_federal_taxes(regular_income, capital_gains, social_security_benef
     - taxes_owed (float): Total federal taxes owed.
     - effective_tax_rate (float): Effective tax rate.
     """
-    income_tax_brackets = {
-        "single": [
-            (0, 11000, 0.1),
-            (11000, 44725, 0.12),
-            (44725, 86375, 0.22),
-            (86375, 164925, 0.24),
-            (164925, 209425, 0.32),
-            (209425, 523600, 0.35),
-            (523600, float('inf'), 0.37)
-        ],
-        "married": [
-            (0, 19900, 0.1),
-            (19900, 81050, 0.12),
-            (81050, 172750, 0.22),
-            (172750, 329850, 0.24),
-            (329850, 418850, 0.32),
-            (418850, 628300, 0.35),
-            (628300, float('inf'), 0.37)
-        ]
-    }
 
-    social_security_thresholds = {
-            'single': {'base_amount': 25000, 'phaseout': 9000},
-            'married': {'base_amount': 32000, 'phaseout': 12000}
-        }
-    
-    capital_gains_tax_brackets = {
-        "single": [
-            {"lower_limit": 0, "upper_limit": 40000, "tax_rate": 0},
-            {"lower_limit": 40000, "upper_limit": 441450, "tax_rate": 0.15},
-            {"lower_limit": 441450, "upper_limit": float('inf'), "tax_rate": 0.20}
-        ],
-        "married": [
-            {"lower_limit": 0, "upper_limit": 80000, "tax_rate": 0},
-            {"lower_limit": 80000, "upper_limit": 496600, "tax_rate": 0.15},
-            {"lower_limit": 496600, "upper_limit": float('inf'), "tax_rate": 0.20}
-        ]
-    }
+    with open(INCOME_TAX_BRACKETS_FILE, 'r') as f:
+        income_tax_brackets = json.load(f)
+
+    with open(SOCIAL_SECURITY_THRESHOLD_FILE, 'r') as f:
+        social_security_thresholds = json.load(f)
+
+    with open(CAPITAL_GAINS_TAX_BRACKETS_FILE, 'r') as f:
+        capital_gains_tax_brackets = json.load(f)
+
+    with open(STANDARD_DEDUCTION, 'r') as f:
+        standard_deduction = json.load(f)
 
     agi = regular_income + capital_gains
     combined_income = agi + social_security_benefits / 2
     social_security_taxable_amount = calculate_taxable_social_security_benefits(combined_income, social_security_thresholds[filing_status], social_security_benefits)
-    standard_deduction = 25550 if filing_status == "married" else 12775
-    taxable_income = max(0, regular_income + social_security_taxable_amount - standard_deduction)
+    taxable_income = max(0, regular_income + social_security_taxable_amount - standard_deduction[filing_status])
     tax_liability = calculate_tax_liability(taxable_income, income_tax_brackets[filing_status])
     capital_gains_tax_liability = calculate_long_term_capital_gains_tax_liability(taxable_income, capital_gains, capital_gains_tax_brackets[filing_status])
     total_taxes_owed = tax_liability + capital_gains_tax_liability
@@ -132,4 +113,4 @@ def calculate_federal_taxes(regular_income, capital_gains, social_security_benef
 
     return (total_taxes_owed, effective_tax_rate)
 
-
+print(calculate_federal_taxes(100000, 100000, 100000, 'single'))
