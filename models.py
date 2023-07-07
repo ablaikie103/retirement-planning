@@ -51,7 +51,15 @@ def simulate_stock_returns(mean1, std1, mean2, std2, correlation):
     
     return simulate
 
-def monte_carlo_simulation(starting_amount, spending, years, mean1, std1, mean2, std2, correlation, w1, plot=False):
+def monte_carlo_simulation(starting_amount, spending, deposit, years, w1, plot=False):
+    with open('configs/market_returns.json', 'r') as f:
+        config = json.load(f)
+        mean1 = config['stock_returns']
+        std1 = config['stock_std']
+        mean2 = config['bond_returns']
+        std2 = config['bond_std']
+        correlation = config['correlation']
+    
     price_series = np.zeros(years)
     price_series[0] = starting_amount
     simulate_func = simulate_stock_returns(mean1, std1, mean2, std2, correlation)
@@ -62,7 +70,6 @@ def monte_carlo_simulation(starting_amount, spending, years, mean1, std1, mean2,
         price_series[i] = price_series[i - 1] * (1+yearly_returns)
         withdrawal = calculate_withdrawal_for_spending(spending, 0, 0, 'single', calculate_federal_taxes)
         price_series[i] = max(price_series[i] - withdrawal, 0)
-        print(withdrawal)
 
     if plot:
         plt.plot(price_series)
@@ -72,27 +79,26 @@ def monte_carlo_simulation(starting_amount, spending, years, mean1, std1, mean2,
         plt.show()
     return price_series
 
-def run_monte_carlo_simulation(starting_amount, spending, years,  stock_weight, num_simulations=100):
-    with open('configs/market_returns.json', 'r') as f:
-        config = json.load(f)
-        mean1 = config['stock_returns']
-        std1 = config['stock_std']
-        mean2 = config['bond_returns']
-        std2 = config['bond_std']
-        correlation = config['correlation']
+def run_monte_carlo_simulation(starting_amount, spending, deposit, years, stock_weight, num_simulations=100):
 
     pass_count = 0
     fail_count = 0
+    ending_value_sum = 0
     for i in range(num_simulations):
-        price_series = monte_carlo_simulation(starting_amount, spending, years, mean1, std1, mean2, std2, correlation, stock_weight)
+        price_series = monte_carlo_simulation(starting_amount, spending, deposit, years, stock_weight)
         if price_series[-1] > 0:
             pass_count += 1
+            ending_value_sum += price_series[-1]
         else:
             fail_count += 1
+    
     pass_percentage = pass_count / num_simulations * 100
     fail_percentage = fail_count / num_simulations * 100
+    ending_value = ending_value_sum / pass_count
     print(f"Pass percentage: {pass_percentage:.2f}%")
     print(f"Fail percentage: {fail_percentage:.2f}%")
+    print(f"Average ending value: {ending_value:.2f}")
+
     return pass_percentage, fail_percentage
 
-print(run_monte_carlo_simulation(1000000, 40000, 30, 1, 1))
+print(run_monte_carlo_simulation(1000000, 50000, 0, 30, 0.5, 100))
