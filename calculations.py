@@ -1,4 +1,5 @@
 import json
+import numpy as np
 
 SOCIAL_SECURITY_THRESHOLD_FILE = 'configs/social_security_thresholds.json'
 INCOME_TAX_BRACKETS_FILE = 'configs/federal_tax_brackets.json'
@@ -108,9 +109,7 @@ def calculate_federal_taxes(regular_income, capital_gains, social_security_benef
     taxable_income = max(0, regular_income + social_security_taxable_amount - standard_deduction[filing_status])
     tax_liability = calculate_tax_liability(taxable_income, income_tax_brackets[filing_status])
     capital_gains_tax_liability = calculate_long_term_capital_gains_tax_liability(taxable_income, capital_gains, capital_gains_tax_brackets[filing_status])
-    total_taxes_owed = tax_liability + capital_gains_tax_liability
+    total_taxes_owed = max(tax_liability + capital_gains_tax_liability,0)
     effective_tax_rate = total_taxes_owed / (regular_income + capital_gains + social_security_benefits)
 
     return (total_taxes_owed, effective_tax_rate)
-
-print(calculate_federal_taxes(100000, 100000, 100000, 'single'))
