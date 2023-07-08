@@ -110,6 +110,9 @@ def calculate_federal_taxes(regular_income, capital_gains, social_security_benef
     tax_liability = calculate_tax_liability(taxable_income, income_tax_brackets[filing_status])
     capital_gains_tax_liability = calculate_long_term_capital_gains_tax_liability(taxable_income, capital_gains, capital_gains_tax_brackets[filing_status])
     total_taxes_owed = max(tax_liability + capital_gains_tax_liability,0)
-    effective_tax_rate = total_taxes_owed / (regular_income + capital_gains + social_security_benefits)
 
+    if regular_income + capital_gains + social_security_benefits > 0:
+        effective_tax_rate = total_taxes_owed / (regular_income + capital_gains + social_security_benefits)
+    else:
+        effective_tax_rate = 0
     return (total_taxes_owed, effective_tax_rate)

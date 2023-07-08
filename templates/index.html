@@ -66,5 +66,16 @@
       </select>
       <input type="submit" value="Calculate Taxes">
     </form>
+
+    <h1>Simulate Retirement</h1>
+    <form action="/simulate_retirement" method="POST">
+      <label for="amount_saved">Amount Saved:</label>
+      <input type="number" name="amount_saved" id="amount_saved" required>
+      <label for="desired_spending">Desired Retirement Spending:</label>
+      <input type="number" name="desired_spending" id="desired_spending" required>
+      <label for="contributions">Annual Retirement Contributions:</label>
+      <input type="number" name="contributions" id="contributions" required>
+      <input type="submit" value="Simulate Retirement">
+    </form>
   </body>
 </html>
